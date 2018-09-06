@@ -227,5 +227,10 @@
         {
             get { return Resource.Exit; }
         }
+
+        public static string NoProductsMessage
+        {
+            get { return Resource.NoProductsMessage; }
+        }
     }
 }

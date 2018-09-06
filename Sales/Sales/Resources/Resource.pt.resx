@@ -246,4 +246,7 @@
   <data name="Exit" xml:space="preserve">
     <value>Fechar sessão</value>
   </data>
+  <data name="NoProductsMessage" xml:space="preserve">
+    <value>Nenhuma informação de produtos disponível.</value>
+  </data>
 </root>

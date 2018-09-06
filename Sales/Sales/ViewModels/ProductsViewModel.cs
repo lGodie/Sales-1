@@ -1,9 +1,9 @@
 ﻿namespace Sales.ViewModels
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Threading.Tasks;
     using System.Windows.Input;
     using Common.Models;
     using GalaSoft.MvvmLight.Command;
@@ -14,6 +14,8 @@
     public class ProductsViewModel : BaseViewModel
     {
         #region Attributes
+        private DataService dataService;
+
         private ApiService apiService;
 
         private bool isRefreshing;
@@ -53,6 +55,7 @@
         public ProductsViewModel()
         {
             instance = this;
+            this.dataService = new DataService();
             this.apiService = new ApiService();
             this.LoadProducts();
         }
@@ -75,30 +78,56 @@
         #region Methods
         private async void LoadProducts()
         {
-            this.IsRefreshing = true;
 
             var connection = await this.apiService.CheckConnection();
-            if (!connection.IsSuccess)
+            if (connection.IsSuccess)
             {
+                this.IsRefreshing = true;
+                var response = await this.LoadProductsFromAPI();
+                if (response.IsSuccess)
+                {
+                    this.SaveProducts();
+                }
+
                 this.IsRefreshing = false;
-                await Application.Current.MainPage.DisplayAlert(Languages.Error, connection.Message, Languages.Accept);
-                return;
+            }
+            else
+            {
+                await this.LoadProductsFromDB();
             }
 
+            if(this.MyProducts == null || this.MyProducts.Count == 0)
+            {
+                this.IsRefreshing = false;
+                await Application.Current.MainPage.DisplayAlert(Languages.Error, Languages.NoProductsMessage, Languages.Accept);
+            }
+
+            this.RefreshList();
+        }
+
+        private async Task SaveProducts()
+        {
+            await this.dataService.DeleteAllProducts();
+            await this.dataService.Insert(this.MyProducts);
+        }
+
+        private async Task<Response> LoadProductsFromAPI()
+        {
             var url = Application.Current.Resources["UrlAPI"].ToString();
             var prefix = Application.Current.Resources["UrlPrefix"].ToString();
             var controller = Application.Current.Resources["UrlProductsController"].ToString();
             var response = await this.apiService.GetList<Product>(url, prefix, controller);
-            if (!response.IsSuccess)
+            if (response.IsSuccess)
             {
-                this.IsRefreshing = false;
-                await Application.Current.MainPage.DisplayAlert(Languages.Error, response.Message, Languages.Accept);
-                return;
+                this.MyProducts = (List<Product>)response.Result;
             }
 
-            this.MyProducts = (List<Product>)response.Result;
-            this.RefreshList();
-            this.IsRefreshing = false;
+            return response;
+        }
+
+        private async Task LoadProductsFromDB()
+        {
+            this.MyProducts = await dataService.GetAllProducts();
         }
 
         public void RefreshList()
