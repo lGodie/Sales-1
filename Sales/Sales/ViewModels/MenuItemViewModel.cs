@@ -33,7 +33,7 @@
                 Settings.TokenType = string.Empty;
                 Settings.AccessToken = string.Empty;
                 MainViewModel.GetInstance().Login = new LoginViewModel();
-                Application.Current.MainPage = new LoginPage();
+                Application.Current.MainPage = new NavigationPage(new LoginPage());
             }
         }
         #endregion

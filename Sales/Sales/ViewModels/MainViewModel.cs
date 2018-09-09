@@ -1,12 +1,10 @@
 ﻿namespace Sales.ViewModels
 {
-    using System;
     using System.Collections.ObjectModel;
     using System.Windows.Input;
     using GalaSoft.MvvmLight.Command;
-    using Sales.Helpers;
+    using Helpers;
     using Views;
-    using Xamarin.Forms;
 
     public class MainViewModel
     {
@@ -18,6 +16,8 @@
         public AddProductViewModel AddProduct { get; set; }
 
         public LoginViewModel Login { get; set; }
+
+        public RegisterViewModel Register { get; set; }
 
         public ObservableCollection<MenuItemViewModel> Menu { get; set; }
         #endregion

@@ -27,7 +27,7 @@ namespace Sales
             else
             {
                 MainViewModel.GetInstance().Login = new LoginViewModel();
-                this.MainPage = new LoginPage();
+                this.MainPage = new NavigationPage(new LoginPage());
             }
         }
         #endregion

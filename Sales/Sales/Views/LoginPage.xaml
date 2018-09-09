@@ -31,7 +31,7 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         Keyboard="Email"
-                        Text="{Binding Email, Mode=TwoWay}"
+                        Text="{Binding Email}"
                         Placeholder="{i18n:Translate EmailPlaceHolder}">
                     </Entry>
                     <Label

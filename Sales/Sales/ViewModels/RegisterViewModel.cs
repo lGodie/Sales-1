@@ -1,21 +1,17 @@
 ﻿namespace Sales.ViewModels
 {
-    using Common.Models;
+    using System.Windows.Input;
     using GalaSoft.MvvmLight.Command;
+    using Helpers;
     using Plugin.Media;
     using Plugin.Media.Abstractions;
-    using Sales.Helpers;
+    using Sales.Common.Models;
     using Services;
-    using System;
-    using System.Linq;
-    using System.Windows.Input;
     using Xamarin.Forms;
 
-    public class EditProductViewModel : BaseViewModel
+    public class RegisterViewModel : BaseViewModel
     {
         #region Attributes
-        private Product product;
-
         private MediaFile file;
 
         private ImageSource imageSource;
@@ -28,11 +24,19 @@
         #endregion
 
         #region Properties
-        public Product Product
-        {
-            get { return this.product; }
-            set { this.SetValue(ref this.product, value); }
-        }
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string EMail { get; set; }
+
+        public string Phone { get; set; }
+
+        public string Address { get; set; }
+
+        public string Password { get; set; }
+
+        public string PasswordConfirm { get; set; }
 
         public bool IsRunning
         {
@@ -54,75 +58,15 @@
         #endregion
 
         #region Constructors
-        public EditProductViewModel(Product product)
+        public RegisterViewModel()
         {
-            this.product = product;
             this.apiService = new ApiService();
             this.IsEnabled = true;
-            this.ImageSource = product.ImageFullPath;
+            this.ImageSource = "nouser";
         }
         #endregion
 
-
         #region Commands
-        public ICommand DeleteCommand
-        {
-            get
-            {
-                return new RelayCommand(Delete);
-            }
-        }
-
-        private async void Delete()
-        {
-            var answer = await Application.Current.MainPage.DisplayAlert(
-                Languages.Confirm,
-                Languages.DeleteConfirmation,
-                Languages.Yes,
-                Languages.No);
-            if (!answer)
-            {
-                return;
-            }
-
-            this.IsRunning = true;
-            this.IsEnabled = false;
-
-            var connection = await this.apiService.CheckConnection();
-            if (!connection.IsSuccess)
-            {
-                this.IsRunning = false;
-                this.IsEnabled = true;
-                await Application.Current.MainPage.DisplayAlert(Languages.Error, connection.Message, Languages.Accept);
-                return;
-            }
-
-            var url = Application.Current.Resources["UrlAPI"].ToString();
-            var prefix = Application.Current.Resources["UrlPrefix"].ToString();
-            var controller = Application.Current.Resources["UrlProductsController"].ToString();
-            var response = await this.apiService.Delete(url, prefix, controller, this.Product.ProductId, Settings.TokenType, Settings.AccessToken);
-            if (!response.IsSuccess)
-            {
-                this.IsRunning = false;
-                this.IsEnabled = true;
-                await Application.Current.MainPage.DisplayAlert(Languages.Error, response.Message, Languages.Accept);
-                return;
-            }
-
-            var productsViewModel = ProductsViewModel.GetInstance();
-            var deletedProduct = productsViewModel.MyProducts.Where(p => p.ProductId == this.Product.ProductId).FirstOrDefault();
-            if (deletedProduct != null)
-            {
-                productsViewModel.MyProducts.Remove(deletedProduct);
-            }
-
-            productsViewModel.RefreshList();
-
-            this.IsRunning = false;
-            this.IsEnabled = true;
-            await App.Navigator.PopAsync();
-        }
-
         public ICommand ChangeImageCommand
         {
             get
@@ -184,20 +128,84 @@
 
         private async void Save()
         {
-            if (string.IsNullOrEmpty(this.Product.Description))
+            if (string.IsNullOrEmpty(this.FirstName))
             {
                 await Application.Current.MainPage.DisplayAlert(
                     Languages.Error,
-                    Languages.DescriptionError,
+                    Languages.FirstNameError,
                     Languages.Accept);
                 return;
             }
 
-            if (this.Product.Price < 0)
+            if (string.IsNullOrEmpty(this.LastName))
             {
                 await Application.Current.MainPage.DisplayAlert(
                     Languages.Error,
-                    Languages.PriceError,
+                    Languages.LastNameError,
+                    Languages.Accept);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(this.EMail))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.EMailError,
+                    Languages.Accept);
+                return;
+            }
+
+            if (!RegexHelper.IsValidEmailAddress(this.EMail))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.EMailError,
+                    Languages.Accept);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(this.Phone))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.PhoneError,
+                    Languages.Accept);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(this.Password))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.PasswordError,
+                    Languages.Accept);
+                return;
+            }
+
+            if (this.Password.Length < 6)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.PasswordError,
+                    Languages.Accept);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(this.PasswordConfirm))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.PasswordConfirmError,
+                    Languages.Accept);
+                return;
+            }
+
+
+            if (!this.Password.Equals(this.PasswordConfirm))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    Languages.Error,
+                    Languages.PasswordsNoMatch,
                     Languages.Accept);
                 return;
             }
@@ -221,13 +229,22 @@
             if (this.file != null)
             {
                 imageArray = FilesHelper.ReadFully(this.file.GetStream());
-                this.Product.ImageArray = imageArray;
             }
+
+            var userRequest = new UserRequest
+            {
+                Address = this.Address,
+                EMail = this.EMail,
+                FirstName = this.FirstName,
+                ImageArray = imageArray,
+                LastName = this.LastName,
+                Password = this.Password,
+            };
 
             var url = Application.Current.Resources["UrlAPI"].ToString();
             var prefix = Application.Current.Resources["UrlPrefix"].ToString();
-            var controller = Application.Current.Resources["UrlProductsController"].ToString();
-            var response = await this.apiService.Put(url, prefix, controller, this.Product, this.Product.ProductId, Settings.TokenType, Settings.AccessToken);
+            var controller = Application.Current.Resources["UrlUsersController"].ToString();
+            var response = await this.apiService.Post(url, prefix, controller, userRequest);
 
             if (!response.IsSuccess)
             {
@@ -240,20 +257,15 @@
                 return;
             }
 
-            var newProduct = (Product)response.Result;
-            var productsViewModel = ProductsViewModel.GetInstance();
-            var oldProduct = productsViewModel.MyProducts.Where(p => p.ProductId == this.Product.ProductId).FirstOrDefault();
-            if (oldProduct != null)
-            {
-                productsViewModel.MyProducts.Remove(oldProduct);
-            }
-
-            productsViewModel.MyProducts.Add(newProduct);
-            productsViewModel.RefreshList();
-
             this.IsRunning = false;
             this.IsEnabled = true;
-            await App.Navigator.PopAsync();
+
+            await Application.Current.MainPage.DisplayAlert(
+                Languages.Confirm,
+                Languages.RegisterConfirmation,
+                Languages.Accept);
+
+            await Application.Current.MainPage.Navigation.PopAsync();
         }
         #endregion
     }
