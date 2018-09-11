@@ -301,7 +301,6 @@
     <value>The password and confirm must be equals.</value>
   </data>
   <data name="RegisterConfirmation" xml:space="preserve">
-    <value>The user was created successfully. Now you can enter with the email and the assigned password.
-</value>
+    <value>The user was created successfully. Now you can enter with the email and the assigned password.</value>
   </data>
 </root>

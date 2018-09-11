@@ -14,6 +14,8 @@
 
         public string Password { get; set; }
 
+        public string ImagePath { get; set; }
+
         public byte[] ImageArray { get; set; }
     }
 }

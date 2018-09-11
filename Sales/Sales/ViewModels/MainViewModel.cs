@@ -2,6 +2,7 @@
 {
     using System.Collections.ObjectModel;
     using System.Windows.Input;
+    using Common.Models;
     using GalaSoft.MvvmLight.Command;
     using Helpers;
     using Views;
@@ -20,6 +21,21 @@
         public RegisterViewModel Register { get; set; }
 
         public ObservableCollection<MenuItemViewModel> Menu { get; set; }
+
+        public UserASP UserASP { get; set; }
+
+        public string UserFullName
+        {
+            get
+            {
+                if (this.UserASP != null && this.UserASP.Claims != null && this.UserASP.Claims.Count > 1)
+                {
+                    return $"{this.UserASP.Claims[0].ClaimValue} {this.UserASP.Claims[1].ClaimValue}";
+                }
+
+                return null;
+            }
+        }
         #endregion
 
         #region Constructors
