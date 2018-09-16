@@ -1,8 +1,10 @@
 ﻿namespace Sales.ViewModels
 {
+    using System;
     using System.Windows.Input;
     using GalaSoft.MvvmLight.Command;
     using Helpers;
+    using Sales.Views;
     using Services;
     using Xamarin.Forms;
 
@@ -46,6 +48,20 @@
         #endregion
 
         #region Commands
+        public ICommand RegisterCommand
+        {
+            get
+            {
+                return new RelayCommand(Register);
+            }
+        }
+
+        private async void Register()
+        {
+            MainViewModel.GetInstance().Register = new RegisterViewModel();
+            await Application.Current.MainPage.Navigation.PushAsync(new RegisterPage());
+        }
+
         public ICommand LoginCommand
         {
             get
@@ -97,9 +113,15 @@
                 return;
             }
 
+            Settings.TokenType = token.TokenType;
+            Settings.AccessToken = token.AccessToken;
+            Settings.IsRemembered = this.IsRemembered;
+
             this.IsRunning = false;
             this.IsEnabled = true;
-            await Application.Current.MainPage.DisplayAlert("Ok", "Fuck yeahh!!!", Languages.Accept);
+
+            MainViewModel.GetInstance().Products = new ProductsViewModel();
+            Application.Current.MainPage = new MasterPage();
         }
         #endregion
     }
