@@ -11,6 +11,7 @@ namespace Sales
     using Sales.Common.Models;
     using System;
     using System.Threading.Tasks;
+    using Sales.Services;
 
     public partial class App : Application
     {
@@ -63,7 +64,7 @@ namespace Sales
 
             var apiService = new ApiService();
             var dataService = new DataService();
-            var apiSecurity = Application.Current.Resources["APISecurity"].ToString();
+            var url = Current.Resources["UrlUsersController"].ToString();
             TokenResponse token = null;
 
             switch (socialNetwork)
@@ -71,7 +72,7 @@ namespace Sales
                 case "Instagram":
                     var responseInstagram = profile as InstagramResponse;
                     token = await apiService.LoginInstagram(
-                        apiSecurity,
+                        url,
                         "/api",
                         "/Users/LoginInstagram",
                         responseInstagram);
@@ -80,7 +81,7 @@ namespace Sales
                 case "Facebook":
                     var responseFacebook = profile as FacebookResponse;
                     token = await apiService.LoginFacebook(
-                        apiSecurity,
+                        url,
                         "/api",
                         "/Users/LoginFacebook",
                         responseFacebook);
@@ -89,7 +90,7 @@ namespace Sales
                 case "Twitter":
                     var responseTwitter = profile as TwitterResponse;
                     token = await apiService.LoginTwitter(
-                        apiSecurity,
+                        url,
                         "/api",
                         "/Users/LoginTwitter",
                         responseTwitter);
@@ -102,29 +103,22 @@ namespace Sales
                 return;
             }
 
-            var user = await apiService.GetUserByEmail(
-                apiSecurity,
-                "/api",
-                "/Users/GetUserByEmail",
-                token.TokenType,
-                token.AccessToken,
-                token.UserName);
+            Settings.IsRemembered = true;
+            Settings.AccessToken = token.AccessToken;
+            Settings.TokenType = token.TokenType;
 
-            UserLocal userLocal = null;
-            if (user != null)
+            var prefix = Application.Current.Resources["UrlPrefix"].ToString();
+            var controller = Application.Current.Resources["UrlUsersController"].ToString();
+            var response = await apiService.GetUser(url, prefix, $"{controller}/GetUser", token.UserName, token.TokenType, token.AccessToken);
+            if (response.IsSuccess)
             {
-                userLocal = Converter.ToUserLocal(user);
-                dataService.DeleteAllAndInsert(userLocal);
-                dataService.DeleteAllAndInsert(token);
+                var userASP = (UserASP)response.Result;
+                MainViewModel.GetInstance().UserASP = userASP;
+                Settings.UserASP = JsonConvert.SerializeObject(userASP);
             }
 
-            var mainViewModel = MainViewModel.GetInstance();
-            mainViewModel.Token = token;
-            mainViewModel.User = userLocal;
-            mainViewModel.RegisterDevice();
-            mainViewModel.Matches = new MatchesViewModel();
+            MainViewModel.GetInstance().Products = new ProductsViewModel();
             Application.Current.MainPage = new MasterPage();
-            Settings.IsRemembered = "true";
         }
 
         protected override void OnStart()

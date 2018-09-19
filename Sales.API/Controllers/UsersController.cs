@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
     using System.Web.Http;
     using Common.Models;
     using Helpers;
@@ -57,6 +58,13 @@
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost]
+        [Route("LoginFacebook")]
+        public async Task<IHttpActionResult> LoginFacebook(FacebookResponse profile)
+        {
+            return Ok(true);
         }
     }
 }

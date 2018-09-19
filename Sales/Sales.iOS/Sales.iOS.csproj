@@ -91,6 +91,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Implementations\Localize.cs" />
+    <Compile Include="Implementations\LoginFacebookPageRenderer.cs" />
+    <Compile Include="Implementations\LoginInstagramPageRenderer.cs" />
+    <Compile Include="Implementations\LoginTwitterPageRenderer.cs" />
     <Compile Include="Implementations\PathService.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
@@ -211,6 +214,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\..\Sales.Common\Sales.Common.csproj">
+      <Project>{0bbf6d2c-546e-49aa-8d7d-b6a7c1de2ee9}</Project>
+      <Name>Sales.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sales\Sales.csproj">
       <Project>{43F10B18-8292-4AD1-9581-2B50A91AB543}</Project>
       <Name>Sales</Name>
