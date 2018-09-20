@@ -34,8 +34,8 @@ namespace Sales.Droid.Implementations
                 if (eventArgs.IsAuthenticated)
                 {
                     var accessToken = eventArgs.Account.Properties["access_token"].ToString();
-                    var profile = await GetFacebookProfileAsync(accessToken);
-                    await App.NavigateToProfile(profile, "Facebook");
+                    var token = await GetFacebookProfileAsync(accessToken);
+                    await App.NavigateToProfile(token);
                 }
                 else
                 {
@@ -46,10 +46,19 @@ namespace Sales.Droid.Implementations
             activity.StartActivity(auth.GetUI(activity));
         }
 
-        private async Task<FacebookResponse> GetFacebookProfileAsync(string accessToken)
+        private async Task<TokenResponse> GetFacebookProfileAsync(string accessToken)
         {
+            var url = Xamarin.Forms.Application.Current.Resources["UrlAPI"].ToString();
+            var prefix = Xamarin.Forms.Application.Current.Resources["UrlPrefix"].ToString();
+            var controller = Xamarin.Forms.Application.Current.Resources["UrlUsersController"].ToString();
             var apiService = new ApiService();
-            return await apiService.GetFacebook(accessToken);
+            var facebookResponse = await apiService.GetFacebook(accessToken);
+            var token = await apiService.LoginFacebook(
+                url,
+                prefix,
+                $"{controller}/LoginFacebook",
+                facebookResponse);
+            return token;
         }
     }
 }

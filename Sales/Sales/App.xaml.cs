@@ -54,49 +54,8 @@ namespace Sales
             }
         }
 
-        public static async Task NavigateToProfile<T>(T profile, string socialNetwork)
+        public static async Task NavigateToProfile(TokenResponse token)
         {
-            if (profile == null)
-            {
-                Application.Current.MainPage = new NavigationPage(new LoginPage());
-                return;
-            }
-
-            var apiService = new ApiService();
-            var dataService = new DataService();
-            var url = Current.Resources["UrlUsersController"].ToString();
-            TokenResponse token = null;
-
-            switch (socialNetwork)
-            {
-                case "Instagram":
-                    var responseInstagram = profile as InstagramResponse;
-                    token = await apiService.LoginInstagram(
-                        url,
-                        "/api",
-                        "/Users/LoginInstagram",
-                        responseInstagram);
-                    break;
-
-                case "Facebook":
-                    var responseFacebook = profile as FacebookResponse;
-                    token = await apiService.LoginFacebook(
-                        url,
-                        "/api",
-                        "/Users/LoginFacebook",
-                        responseFacebook);
-                    break;
-
-                case "Twitter":
-                    var responseTwitter = profile as TwitterResponse;
-                    token = await apiService.LoginTwitter(
-                        url,
-                        "/api",
-                        "/Users/LoginTwitter",
-                        responseTwitter);
-                    break;
-            }
-
             if (token == null)
             {
                 Application.Current.MainPage = new NavigationPage(new LoginPage());
@@ -107,6 +66,8 @@ namespace Sales
             Settings.AccessToken = token.AccessToken;
             Settings.TokenType = token.TokenType;
 
+            var apiService = new ApiService();
+            var url = Application.Current.Resources["UrlAPI"].ToString();
             var prefix = Application.Current.Resources["UrlPrefix"].ToString();
             var controller = Application.Current.Resources["UrlUsersController"].ToString();
             var response = await apiService.GetUser(url, prefix, $"{controller}/GetUser", token.UserName, token.TokenType, token.AccessToken);

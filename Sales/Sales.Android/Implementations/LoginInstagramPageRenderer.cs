@@ -38,7 +38,7 @@ namespace Sales.Droid.Implementations
                 {
                     var accessToken = eventArgs.Account.Properties["access_token"].ToString();
                     var profile = await GetInstagramProfileAsync(accessToken);
-                    App.NavigateToProfile(profile, "Instagram");
+                    App.NavigateToProfile(null);
                 }
                 else
                 {

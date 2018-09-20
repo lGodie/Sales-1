@@ -36,6 +36,27 @@
                 return null;
             }
         }
+
+        public string UserImageFullPath
+        {
+            get
+            {
+                foreach (var claim in this.UserASP.Claims)
+                {
+                    if (claim.ClaimType == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/uri")
+                    {
+                        if (claim.ClaimValue.StartsWith("~"))
+                        {
+                            return $"https://salesapiservices.azurewebsites.net{claim.ClaimValue.Substring(1)}";
+                        }
+
+                        return claim.ClaimValue;
+                    }
+                }
+
+                return null;
+            }
+        }
         #endregion
 
         #region Constructors

@@ -39,7 +39,7 @@ namespace Sales.Droid.Implementations
                 if (eventArgs.IsAuthenticated)
                 {
                     TwitterResponse profile = await GetTwitterProfileAsync(eventArgs.Account);
-                    App.NavigateToProfile(profile, "Twitter");
+                    App.NavigateToProfile(null);
                 }
                 else
                 {
