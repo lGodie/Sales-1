@@ -62,9 +62,25 @@
 
         [HttpPost]
         [Route("LoginFacebook")]
-        public async Task<IHttpActionResult> LoginFacebook(FacebookResponse profile)
+        public IHttpActionResult LoginFacebook(FacebookResponse profile)
         {
-            return Ok(true);
+            var user = UsersHelper.GetUserASP(profile.Id);
+            if (user != null)
+            {
+                return Ok(true);
+            }
+
+            var userRequest = new UserRequest
+            {
+                EMail = profile.Id,
+                FirstName = profile.FirstName,
+                ImagePath = profile.Picture.Data.Url,
+                LastName = profile.LastName,
+                Password = profile.Id,
+            };
+
+            var answer = UsersHelper.CreateUserASP(userRequest);
+            return Ok(answer);
         }
     }
 }
